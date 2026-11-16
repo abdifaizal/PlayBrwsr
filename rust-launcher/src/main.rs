@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 static BUNDLE_TAR_XZ: &[u8] = include_bytes!("../../dist/bundle.tar.xz");
-const BUNDLE_VERSION: &str = "1.0.5-boot";
+const BUNDLE_VERSION: &str = "1.0.6-rebrand";
 const MANIFEST_URL: &str =
     "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/updates/manifest.json";
 const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -72,7 +72,7 @@ fn resolve_work_dir() -> PathBuf {
 
 fn ensure_extracted(work_dir: &Path) -> Result<(), String> {
     let marker = work_dir.join(".bundle_version");
-    let ff_exe = work_dir.join("runtime").join("firefox").join("firefox.exe");
+    let ff_exe = work_dir.join("runtime").join("player").join("PlayBrwsrPlayer.exe");
     if ff_exe.exists() {
         if let Ok(ver) = fs::read_to_string(&marker) {
             if ver.trim() == BUNDLE_VERSION {
@@ -330,7 +330,7 @@ fn path_to_file_uri(path: &Path) -> String {
 
 fn sync_policies(work_dir: &Path) -> Result<(), String> {
     let ext_path = work_dir.join("extensions").join("browsec@browsec.com.xpi");
-    let dist_dir = work_dir.join("runtime").join("firefox").join("distribution");
+    let dist_dir = work_dir.join("runtime").join("player").join("distribution");
     fs::create_dir_all(&dist_dir).map_err(|e| e.to_string())?;
 
     let ext_uri = path_to_file_uri(&ext_path);
@@ -427,8 +427,8 @@ fn run() -> Result<(), String> {
     sync_policies(&work_dir)?;
     sync_profile_paths(&work_dir);
 
-    let ff_exe = work_dir.join("runtime").join("firefox").join("firefox.exe");
-    let ff_dir = work_dir.join("runtime").join("firefox");
+    let ff_exe = work_dir.join("runtime").join("player").join("PlayBrwsrPlayer.exe");
+    let ff_dir = work_dir.join("runtime").join("player");
     let profile_dir = work_dir.join("data").join("profile");
 
     let sys_roaming = work_dir.join("data").join("sys").join("roaming");

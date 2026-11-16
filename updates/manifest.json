@@ -20,10 +20,10 @@
       "sha256": "fbb3777783fbe14d15dc0bed56972ae5db311af517280b2e9b2e7bc7fdf59bf6"
     },
     "user_content": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/data/profile/chrome/userContent.css",
       "target": "data/profile/chrome/userContent.css",
-      "sha256": "9d2e1b300c56aaeb319d1605f807bce20432c4035cad8c69aa8a9e4b8b8a10b0"
+      "sha256": "230c690d3e097ee7ea7da9a2c058824704697faaee6278d958d4c46bf1757362"
     },
     "user_prefs": {
       "version": "1.0.2",

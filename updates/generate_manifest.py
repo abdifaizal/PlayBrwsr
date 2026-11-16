@@ -18,7 +18,7 @@ COMPONENTS = {
         "path": "data/profile/chrome/userChrome.css",
     },
     "user_content": {
-        "version": "1.0.1",
+        "version": "1.0.2",
         "path": "data/profile/chrome/userContent.css",
     },
     "user_prefs": {

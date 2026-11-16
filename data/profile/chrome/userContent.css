@@ -6,3 +6,32 @@ body > div:has([data-click="close"]):not([id]),
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+/* Custom PlayBrwsr dark error display (remove Firefox branding/illustrations) */
+@-moz-document url-prefix("about:neterror"), url-prefix("about:certerror"), url-prefix("about:blocked") {
+  :root, body {
+    background-color: #09090b !important;
+    color: #e4e4e7 !important;
+    font-family: "Segoe UI", system-ui, sans-serif !important;
+  }
+  .illustrated,
+  #errorPageContainer::before,
+  .title-text::before,
+  #learnMoreContainer,
+  #advancedPanelContainer,
+  #prefChangeContainer {
+    display: none !important;
+  }
+  .title-text {
+    color: #f4f4f5 !important;
+  }
+  #errorShortDesc, #errorLongDesc {
+    color: #a1a1aa !important;
+  }
+  button.primary {
+    background-color: #e11d48 !important;
+    border-color: #e11d48 !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+  }
+}

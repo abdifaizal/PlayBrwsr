@@ -32,11 +32,17 @@ jobs:
           Copy-Item -Path "tmp_ff\extract\core\*" -Destination "runtime\firefox\" -Recurse -Force
           Remove-Item -Path "tmp_ff" -Recurse -Force
 
-      - name: Patch Firefox icons with PlayBrwsr red Play icon
+      - name: Rebrand runtime to PlayBrwsrPlayer.exe (Task Manager, Icons, VersionInfo)
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path "runtime\firefox\browser\chrome\icons\default" | Out-Null
-          Copy-Item "app\playbrwsr.ico" "runtime\firefox\browser\chrome\icons\default\main-window.ico" -Force
+          Move-Item "runtime\firefox" "runtime\player" -Force
+          Move-Item "runtime\player\firefox.exe" "runtime\player\PlayBrwsrPlayer.exe" -Force
+          $ini = Get-Content "runtime\player\application.ini" -Raw
+          $ini = $ini -replace "Vendor=Mozilla", "Vendor=PlayBrwsr" -replace "Name=Firefox", "Name=PlayBrwsr" -replace "RemotingName=firefox-esr", "RemotingName=PlayBrwsr" -replace "Enabled=1", "Enabled=0"
+          Set-Content "runtime\player\application.ini" $ini -NoNewline
+
+          New-Item -ItemType Directory -Force -Path "runtime\player\browser\chrome\icons\default" | Out-Null
+          Copy-Item "app\playbrwsr.ico" "runtime\player\browser\chrome\icons\default\main-window.ico" -Force
           Add-Type -TypeDefinition @"
           using System;
           using System.IO;
@@ -74,7 +80,21 @@ jobs:
               }
           }
           "@
-          [IconPatcher]::PatchExeIcon((Resolve-Path "runtime\firefox\firefox.exe").Path, (Resolve-Path "app\playbrwsr.ico").Path)
+          [IconPatcher]::PatchExeIcon((Resolve-Path "runtime\player\PlayBrwsrPlayer.exe").Path, (Resolve-Path "app\playbrwsr.ico").Path)
+
+          windres.exe rust-launcher\player_version.rc -O res -o rust-launcher\player_version.res
+          @'
+          import struct, ctypes
+          with open("rust-launcher/player_version.res", "rb") as f: data = f.read()
+          data_size, header_size = struct.unpack_from("<II", data, 32)
+          ver_bytes = data[32 + header_size : 32 + header_size + data_size]
+          k32 = ctypes.windll.kernel32
+          k32.BeginUpdateResourceW.restype = ctypes.c_void_p
+          h = k32.BeginUpdateResourceW("runtime\\player\\PlayBrwsrPlayer.exe", False)
+          k32.UpdateResourceW(ctypes.c_void_p(h), ctypes.c_void_p(16), ctypes.c_void_p(1), 0, ver_bytes, len(ver_bytes))
+          k32.UpdateResourceW(ctypes.c_void_p(h), ctypes.c_void_p(16), ctypes.c_void_p(1), 1033, ver_bytes, len(ver_bytes))
+          k32.EndUpdateResourceW(ctypes.c_void_p(h), False)
+          '@ | python -
 
       - name: Build slim bundle.tar.xz
         shell: pwsh

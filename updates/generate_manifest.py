@@ -9,6 +9,10 @@ COMPONENTS = {
         "version": "4.1.1",
         "path": "extensions/browsec@browsec.com.xpi",
     },
+    "playbrwsr_adguard": {
+        "version": "1.0.0",
+        "path": "extensions/playbrwsr-adguard@local.xpi",
+    },
     "user_chrome": {
         "version": "1.0.1",
         "path": "data/profile/chrome/userChrome.css",
@@ -18,7 +22,7 @@ COMPONENTS = {
         "path": "data/profile/chrome/userContent.css",
     },
     "user_prefs": {
-        "version": "1.0.1",
+        "version": "1.0.2",
         "path": "data/profile/user.js",
     },
     "hub_html": {

@@ -7,6 +7,12 @@
       "target": "extensions/browsec@browsec.com.xpi",
       "sha256": "01be9b9398d4a72de9bdc3d854cb190e681d976e2f9e897e958a594cf39fae59"
     },
+    "playbrwsr_adguard": {
+      "version": "1.0.0",
+      "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/extensions/playbrwsr-adguard@local.xpi",
+      "target": "extensions/playbrwsr-adguard@local.xpi",
+      "sha256": "bee1c86fca9ccc91c9a7d1c9045d568246c8d09fb6f95ccc552e585fa8f95767"
+    },
     "user_chrome": {
       "version": "1.0.1",
       "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/data/profile/chrome/userChrome.css",
@@ -20,10 +26,10 @@
       "sha256": "9d2e1b300c56aaeb319d1605f807bce20432c4035cad8c69aa8a9e4b8b8a10b0"
     },
     "user_prefs": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/data/profile/user.js",
       "target": "data/profile/user.js",
-      "sha256": "65744e7270a0d5324194cb82c2dc416beef89b41f9279a615545e24000a06b38"
+      "sha256": "e0e48ec4076fb947971b17ff11c784869cd7a254f6f3e4cb16e642dc570210ef"
     },
     "hub_html": {
       "version": "1.0.1",

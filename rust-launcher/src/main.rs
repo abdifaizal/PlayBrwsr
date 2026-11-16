@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 static BUNDLE_TAR_XZ: &[u8] = include_bytes!("../../dist/bundle.tar.xz");
-const BUNDLE_VERSION: &str = "1.0.3-icon";
+const BUNDLE_VERSION: &str = "1.0.4-adguard";
 const MANIFEST_URL: &str =
     "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/updates/manifest.json";
 const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -296,12 +296,17 @@ fn check_and_update_components(work_dir: &Path) -> Result<Vec<String>, String> {
             let _ = fs::remove_file(&tmp_dl);
         }
 
-        if comp.target == "extensions/browsec@browsec.com.xpi" {
+        if comp.target == "extensions/browsec@browsec.com.xpi"
+            || comp.target == "extensions/playbrwsr-adguard@local.xpi"
+        {
+            let file_name = Path::new(&comp.target)
+                .file_name()
+                .unwrap_or_default();
             let profile_ext = work_dir
                 .join("data")
                 .join("profile")
                 .join("extensions")
-                .join("browsec@browsec.com.xpi");
+                .join(file_name);
             if let Some(p) = profile_ext.parent() {
                 let _ = fs::create_dir_all(p);
             }
@@ -403,12 +408,14 @@ fn run() -> Result<(), String> {
     let _ = fs::create_dir_all(&sys_temp);
     let _ = fs::create_dir_all(&profile_dir);
 
-    let ext_src = work_dir.join("extensions").join("browsec@browsec.com.xpi");
-    let profile_ext_dir = profile_dir.join("extensions");
-    let ext_dst = profile_ext_dir.join("browsec@browsec.com.xpi");
-    if ext_src.exists() && !ext_dst.exists() {
-        let _ = fs::create_dir_all(&profile_ext_dir);
-        let _ = fs::copy(&ext_src, &ext_dst);
+    for ext_name in ["browsec@browsec.com.xpi", "playbrwsr-adguard@local.xpi"] {
+        let ext_src = work_dir.join("extensions").join(ext_name);
+        let profile_ext_dir = profile_dir.join("extensions");
+        let ext_dst = profile_ext_dir.join(ext_name);
+        if ext_src.exists() && !ext_dst.exists() {
+            let _ = fs::create_dir_all(&profile_ext_dir);
+            let _ = fs::copy(&ext_src, &ext_dst);
+        }
     }
 
     let mut urls: Vec<String> = Vec::new();

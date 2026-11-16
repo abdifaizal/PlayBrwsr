@@ -79,23 +79,23 @@ jobs:
       - name: Build slim bundle.tar.xz
         shell: pwsh
         run: |
-          python -c @"
+          @'
           import os, tarfile
-          os.makedirs('dist', exist_ok=True)
-          out_path = os.path.join('dist', 'bundle.tar.xz')
-          skip_dirs = {'cache2','startupCache','shader-cache','thumbnails','minidumps','crashes','sys','safebrowsing','datareporting','settings','uninstall','idb'}
-          skip_files = {'parent.lock','.startup-incomplete','crashreporter.exe','crashhelper.exe','minidump-analyzer.exe','maintenanceservice.exe','maintenanceservice_installer.exe','updater.exe','pingsender.exe','default-browser-agent.exe','onnxruntime.dll','places.sqlite','favicons.sqlite'}
-          with tarfile.open(out_path, 'w:xz', preset=6) as tar:
-              for root_dir in ['runtime', 'extensions', 'data', 'app']:
+          os.makedirs("dist", exist_ok=True)
+          out_path = os.path.join("dist", "bundle.tar.xz")
+          skip_dirs = {"cache2","startupCache","shader-cache","thumbnails","minidumps","crashes","sys","safebrowsing","datareporting","settings","uninstall","idb"}
+          skip_files = {"parent.lock",".startup-incomplete","crashreporter.exe","crashhelper.exe","minidump-analyzer.exe","maintenanceservice.exe","maintenanceservice_installer.exe","updater.exe","pingsender.exe","default-browser-agent.exe","onnxruntime.dll","places.sqlite","favicons.sqlite"}
+          with tarfile.open(out_path, "w:xz", preset=6) as tar:
+              for root_dir in ["runtime", "extensions", "data", "app"]:
                   for dirpath, dirnames, filenames in os.walk(root_dir):
-                      norm = dirpath.replace('\\', '/')
-                      dirnames[:] = [d for d in dirnames if d not in skip_dirs and not (norm.endswith('storage/default') and d.startswith('https+++'))]
+                      norm = dirpath.replace("\\", "/")
+                      dirnames[:] = [d for d in dirnames if d not in skip_dirs and not (norm.endswith("storage/default") and d.startswith("https+++"))]
                       for fn in filenames:
                           if fn in skip_files: continue
-                          if norm.endswith('data/profile/extensions') and fn == 'browsec@browsec.com.xpi': continue
+                          if norm.endswith("data/profile/extensions") and fn == "browsec@browsec.com.xpi": continue
                           full = os.path.join(dirpath, fn)
-                          tar.add(full, arcname=full.replace('\\', '/'))
-          "@
+                          tar.add(full, arcname=full.replace("\\", "/"))
+          '@ | python -
 
       - name: Compile Native Rust PlayBrwsr-Single.exe
         shell: pwsh
@@ -113,10 +113,18 @@ jobs:
 
   sign:
     needs: build
-    if: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
     runs-on: ubuntu-latest
+    outputs:
+      signed: ${{ steps.check.outputs.has_token }}
     steps:
+      - name: Check if SignPath secret is configured
+        id: check
+        env:
+          HAS_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
+        run: echo "has_token=$HAS_TOKEN" >> "$GITHUB_OUTPUT"
+
       - name: Submit signing request to SignPath Foundation
+        if: ${{ steps.check.outputs.has_token == 'true' }}
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
@@ -129,6 +137,7 @@ jobs:
           output-artifact-directory: signed-output
 
       - name: Upload signed build artifact
+        if: ${{ steps.check.outputs.has_token == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: playbrwsr-signed
@@ -140,14 +149,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download signed artifact
-        if: ${{ needs.sign.result == 'success' }}
+        if: ${{ needs.sign.outputs.signed == 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: playbrwsr-signed
           path: release-files
 
       - name: Download unsigned artifact (before SignPath setup)
-        if: ${{ needs.sign.result != 'success' }}
+        if: ${{ needs.sign.outputs.signed != 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: playbrwsr-unsigned

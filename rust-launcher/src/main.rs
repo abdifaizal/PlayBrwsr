@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 static BUNDLE_TAR_XZ: &[u8] = include_bytes!("../../dist/bundle.tar.xz");
-const BUNDLE_VERSION: &str = "1.0.6-rebrand";
+const BUNDLE_VERSION: &str = "1.0.7-noforce";
 const MANIFEST_URL: &str =
     "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/updates/manifest.json";
 const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -329,33 +329,22 @@ fn path_to_file_uri(path: &Path) -> String {
 }
 
 fn sync_policies(work_dir: &Path) -> Result<(), String> {
-    let ext_path = work_dir.join("extensions").join("browsec@browsec.com.xpi");
     let dist_dir = work_dir.join("runtime").join("player").join("distribution");
     fs::create_dir_all(&dist_dir).map_err(|e| e.to_string())?;
 
-    let ext_uri = path_to_file_uri(&ext_path);
-    let policies = format!(
-        r#"{{
-  "policies": {{
+    // Do NOT put browsec@browsec.com in ExtensionSettings (force_installed replaces app-profile and wipes storage.local)
+    let policies = r#"{
+  "policies": {
     "DisableAppUpdate": true,
     "DontCheckDefaultBrowser": true,
     "DisableTelemetry": true,
     "DisablePocket": true,
     "DisableFirefoxAccounts": true,
     "OverrideFirstRunPage": "",
-    "OverridePostUpdatePage": "",
-    "ExtensionSettings": {{
-      "browsec@browsec.com": {{
-        "installation_mode": "force_installed",
-        "install_url": "{}",
-        "default_area": "navbar"
-      }}
-    }}
-  }}
-}}
-"#,
-        ext_uri.replace('"', "\\\"")
-    );
+    "OverridePostUpdatePage": ""
+  }
+}
+"#;
 
     fs::write(dist_dir.join("policies.json"), policies).map_err(|e| e.to_string())
 }

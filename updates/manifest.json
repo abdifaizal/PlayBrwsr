@@ -38,10 +38,10 @@
       "sha256": "8da1a7a6a75f1d370fd58ce0e242dd618b54875d6198f51e848b814ba4e6cea4"
     },
     "boot_html": {
-      "version": "1.0.3",
+      "version": "1.0.4",
       "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/app/boot.html",
       "target": "app/boot.html",
-      "sha256": "31a324a94a8497195e4ec34d70ee050096c6486d73faaa5f928bc39dddc3b75d"
+      "sha256": "8b54f9dddf144c967f95d5e30b211a36078fc7d4c93265eeb8a61f063fa2f1bb"
     }
   }
 }

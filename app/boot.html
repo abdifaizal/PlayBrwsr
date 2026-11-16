@@ -14,7 +14,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
     }
     .spinner {
       width: 36px;
@@ -26,44 +26,41 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .label { font-size: 14px; color: #a1a1aa; }
+    .retry {
+      display: none;
+      margin-top: 8px;
+      padding: 8px 18px;
+      background: #e11d48;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <div class="spinner"></div>
   <div class="label" id="status">Menghubungkan ke Browsec VPN (Singapore)...</div>
+  <a class="retry" id="retryBtn" href="#">Buka Sekarang</a>
   <script>
     const params = new URLSearchParams(location.search);
     const mode = params.get("mode") || "video";
     const target = mode === "music" ? "https://music.youtube.com/" : "https://www.youtube.com/";
     document.title = mode === "music" ? "YouTube Music" : "YouTube";
     const statusEl = document.getElementById("status");
+    const retryBtn = document.getElementById("retryBtn");
+    retryBtn.href = target;
 
-    async function waitForVpn() {
-      await new Promise(r => setTimeout(r, 1500));
-      const deadline = Date.now() + 5000;
-      while (Date.now() < deadline) {
-        try {
-          const ctrl = new AbortController();
-          const t = setTimeout(() => ctrl.abort(), 2000);
-          const res = await fetch("https://ipwho.is/?t=" + Date.now(), {
-            cache: "no-store",
-            signal: ctrl.signal
-          });
-          clearTimeout(t);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.country_code && data.country_code !== "ID") {
-              statusEl.textContent = "Terhubung ke " + (data.country || data.country_code) + " — Membuka...";
-              window.location.replace(target);
-              return;
-            }
-          }
-        } catch (e) {}
-        await new Promise(r => setTimeout(r, 800));
-      }
+    setTimeout(() => {
+      statusEl.textContent = "Membuka " + document.title + "...";
       window.location.replace(target);
-    }
-    waitForVpn();
+    }, 4000);
+
+    setTimeout(() => {
+      statusEl.textContent = "Koneksi agak lambat, mencoba ulang...";
+      retryBtn.style.display = "inline-block";
+    }, 14000);
   </script>
 </body>
 </html>

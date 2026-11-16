@@ -30,7 +30,7 @@ COMPONENTS = {
         "path": "app/hub.html",
     },
     "boot_html": {
-        "version": "1.0.3",
+        "version": "1.0.4",
         "path": "app/boot.html",
     },
 }

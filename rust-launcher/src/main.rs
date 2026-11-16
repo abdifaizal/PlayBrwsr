@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 static BUNDLE_TAR_XZ: &[u8] = include_bytes!("../../dist/bundle.tar.xz");
-const BUNDLE_VERSION: &str = "1.0.7-noforce";
+const BUNDLE_VERSION: &str = "1.0.8-clean";
 const MANIFEST_URL: &str =
     "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/updates/manifest.json";
 const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -80,6 +80,16 @@ fn ensure_extracted(work_dir: &Path) -> Result<(), String> {
             }
         }
     }
+
+    // Clean old runtime/profile caches when upgrading bundle version so stale state never persists
+    let _ = fs::remove_dir_all(work_dir.join("runtime"));
+    let _ = fs::remove_dir_all(work_dir.join("extensions"));
+    let _ = fs::remove_dir_all(work_dir.join("app"));
+    let _ = fs::remove_dir_all(work_dir.join("data").join("profile").join("storage"));
+    let _ = fs::remove_file(work_dir.join("data").join("profile").join("addonStartup.json.lz4"));
+    let _ = fs::remove_file(work_dir.join("data").join("profile").join("extensions.json"));
+    let _ = fs::remove_file(work_dir.join("data").join("profile").join("compatibility.ini"));
+    let _ = fs::remove_file(work_dir.join("data").join("profile").join("prefs.js"));
 
     let tar_path = work_dir.join("_bundle.tar.xz");
     fs::write(&tar_path, BUNDLE_TAR_XZ)

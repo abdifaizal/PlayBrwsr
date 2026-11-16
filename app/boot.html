@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>PlayBrwsr</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #09090b;
+      color: #f4f4f5;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #27272a;
+      border-top-color: #e11d48;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .label { font-size: 14px; color: #a1a1aa; }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <div class="label" id="status">Menghubungkan ke Browsec VPN (Singapore)...</div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const mode = params.get("mode") || "video";
+    const target = mode === "music" ? "https://music.youtube.com/" : "https://www.youtube.com/";
+    document.title = mode === "music" ? "YouTube Music" : "YouTube";
+    const statusEl = document.getElementById("status");
+
+    async function waitForVpn() {
+      await new Promise(r => setTimeout(r, 1500));
+      const deadline = Date.now() + 5000;
+      while (Date.now() < deadline) {
+        try {
+          const ctrl = new AbortController();
+          const t = setTimeout(() => ctrl.abort(), 2000);
+          const res = await fetch("https://ipwho.is/?t=" + Date.now(), {
+            cache: "no-store",
+            signal: ctrl.signal
+          });
+          clearTimeout(t);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.country_code && data.country_code !== "ID") {
+              statusEl.textContent = "Terhubung ke " + (data.country || data.country_code) + " — Membuka...";
+              window.location.replace(target);
+              return;
+            }
+          }
+        } catch (e) {}
+        await new Promise(r => setTimeout(r, 800));
+      }
+      window.location.replace(target);
+    }
+    waitForVpn();
+  </script>
+</body>
+</html>

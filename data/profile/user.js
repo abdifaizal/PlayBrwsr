@@ -25,6 +25,7 @@ user_pref("extensions.autoDisableScopes", 0);
 user_pref("extensions.enabledScopes", 1);
 user_pref("extensions.update.autoUpdateDefault", false);
 user_pref("xpinstall.signatures.required", false);
+user_pref("extensions.webextensions.ExtensionStorageIDB.migrated.browsec@browsec.com", true);
 user_pref("extensions.webextensions.uuids", "{\"browsec@browsec.com\":\"bba20292-a654-403f-a1f8-90d0db093b15\"}");
 
 // Disable Firefox telemetry, Pocket, Sync, and clutter

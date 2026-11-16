@@ -29,6 +29,10 @@ COMPONENTS = {
         "version": "1.0.1",
         "path": "app/hub.html",
     },
+    "boot_html": {
+        "version": "1.0.3",
+        "path": "app/boot.html",
+    },
 }
 
 

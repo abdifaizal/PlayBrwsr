@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 static BUNDLE_TAR_XZ: &[u8] = include_bytes!("../../dist/bundle.tar.xz");
-const BUNDLE_VERSION: &str = "1.0.4-adguard";
+const BUNDLE_VERSION: &str = "1.0.5-boot";
 const MANIFEST_URL: &str =
     "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/updates/manifest.json";
 const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -360,6 +360,36 @@ fn sync_policies(work_dir: &Path) -> Result<(), String> {
     fs::write(dist_dir.join("policies.json"), policies).map_err(|e| e.to_string())
 }
 
+fn sync_profile_paths(work_dir: &Path) {
+    let prof_dir = work_dir.join("data").join("profile");
+    let new_win = work_dir.to_string_lossy().to_string();
+    let new_win_esc = new_win.replace('\\', "\\\\");
+    let new_uri = new_win.replace('\\', "/");
+
+    let old_win = r"C:\Users\00203682\Documents\AntiGravity\PlayBrwsr";
+    let old_win_esc = r"C:\\Users\\00203682\\Documents\\AntiGravity\\PlayBrwsr";
+    let old_uri = "C:/Users/00203682/Documents/AntiGravity/PlayBrwsr";
+
+    let ext_json = prof_dir.join("extensions.json");
+    if let Ok(txt) = fs::read_to_string(&ext_json) {
+        if txt.contains("00203682") {
+            let fixed = txt
+                .replace(old_win_esc, &new_win_esc)
+                .replace(old_uri, &new_uri);
+            let _ = fs::write(&ext_json, fixed);
+            let _ = fs::remove_file(prof_dir.join("addonStartup.json.lz4"));
+        }
+    }
+
+    let comp_ini = prof_dir.join("compatibility.ini");
+    if let Ok(txt) = fs::read_to_string(&comp_ini) {
+        if txt.contains("00203682") {
+            let fixed = txt.replace(old_win, &new_win);
+            let _ = fs::write(&comp_ini, fixed);
+        }
+    }
+}
+
 fn run() -> Result<(), String> {
     let work_dir = resolve_work_dir();
     ensure_extracted(&work_dir)?;
@@ -395,6 +425,7 @@ fn run() -> Result<(), String> {
     }
 
     sync_policies(&work_dir)?;
+    sync_profile_paths(&work_dir);
 
     let ff_exe = work_dir.join("runtime").join("firefox").join("firefox.exe");
     let ff_dir = work_dir.join("runtime").join("firefox");
@@ -418,17 +449,18 @@ fn run() -> Result<(), String> {
         }
     }
 
+    let boot_uri = path_to_file_uri(&work_dir.join("app").join("boot.html"));
     let mut urls: Vec<String> = Vec::new();
     match mode.as_str() {
-        "--video" => urls.push("https://www.youtube.com".to_string()),
-        "--music" => urls.push("https://music.youtube.com".to_string()),
+        "--video" => urls.push(format!("{}?mode=video", boot_uri)),
+        "--music" => urls.push(format!("{}?mode=music", boot_uri)),
         "--hub" => {
             let hub = work_dir.join("app").join("hub.html");
             urls.push(path_to_file_uri(&hub));
         }
         _ => {
-            urls.push("https://www.youtube.com".to_string());
-            urls.push("https://music.youtube.com".to_string());
+            urls.push(format!("{}?mode=video", boot_uri));
+            urls.push(format!("{}?mode=music", boot_uri));
         }
     }
 

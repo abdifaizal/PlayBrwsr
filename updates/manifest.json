@@ -29,13 +29,19 @@
       "version": "1.0.2",
       "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/data/profile/user.js",
       "target": "data/profile/user.js",
-      "sha256": "e0e48ec4076fb947971b17ff11c784869cd7a254f6f3e4cb16e642dc570210ef"
+      "sha256": "1e832b073b2c5fe8343bbdc3c92145d037ba384d673f6cc19564fbdca060f0c1"
     },
     "hub_html": {
       "version": "1.0.1",
       "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/app/hub.html",
       "target": "app/hub.html",
       "sha256": "8da1a7a6a75f1d370fd58ce0e242dd618b54875d6198f51e848b814ba4e6cea4"
+    },
+    "boot_html": {
+      "version": "1.0.3",
+      "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/app/boot.html",
+      "target": "app/boot.html",
+      "sha256": "31a324a94a8497195e4ec34d70ee050096c6486d73faaa5f928bc39dddc3b75d"
     }
   }
 }

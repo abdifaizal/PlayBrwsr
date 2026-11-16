@@ -1,0 +1,129 @@
+name: Build and Sign PlayBrwsr
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust (GNU toolchain)
+        run: |
+          rustup toolchain install stable-gnu --profile minimal
+          rustup default stable-gnu
+
+      - name: Download & extract Firefox ESR runtime
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "tmp_ff", "runtime\firefox" | Out-Null
+          Invoke-WebRequest -Uri "https://download.mozilla.org/?product=firefox-esr-latest-ssl&os=win64&lang=en-US" -OutFile "tmp_ff\firefox-esr.exe"
+          & "C:\Program Files\7-Zip\7z.exe" x "tmp_ff\firefox-esr.exe" "core\*" -o"tmp_ff\extract" -y | Out-Null
+          Copy-Item -Path "tmp_ff\extract\core\*" -Destination "runtime\firefox\" -Recurse -Force
+          Remove-Item -Path "tmp_ff" -Recurse -Force
+
+      - name: Patch Firefox icons with PlayBrwsr red Play icon
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "runtime\firefox\browser\chrome\icons\default" | Out-Null
+          Copy-Item "app\playbrwsr.ico" "runtime\firefox\browser\chrome\icons\default\main-window.ico" -Force
+          Add-Type -TypeDefinition @"
+          using System;
+          using System.IO;
+          using System.Runtime.InteropServices;
+          public class IconPatcher {
+              [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+              public static extern IntPtr BeginUpdateResource(string pFileName, bool bDeleteExistingResources);
+              [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+              public static extern bool UpdateResource(IntPtr hUpdate, IntPtr lpType, IntPtr lpName, ushort wLanguage, byte[] lpData, uint cbData);
+              [DllImport("kernel32.dll", SetLastError = true)]
+              public static extern bool EndUpdateResource(IntPtr hUpdate, bool fDiscard);
+              public static void PatchExeIcon(string exePath, string icoPath) {
+                  byte[] ico = File.ReadAllBytes(icoPath);
+                  int count = BitConverter.ToUInt16(ico, 4);
+                  byte[] grp = new byte[6 + count * 14];
+                  Array.Copy(ico, 0, grp, 0, 6);
+                  IntPtr hUpdate = BeginUpdateResource(exePath, false);
+                  ushort baseIconId = 9001;
+                  for (int i = 0; i < count; i++) {
+                      int srcOff = 6 + i * 16, dstOff = 6 + i * 14;
+                      Array.Copy(ico, srcOff, grp, dstOff, 12);
+                      ushort iconId = (ushort)(baseIconId + i);
+                      grp[dstOff + 12] = (byte)(iconId & 0xFF);
+                      grp[dstOff + 13] = (byte)((iconId >> 8) & 0xFF);
+                      int imgSize = BitConverter.ToInt32(ico, srcOff + 8);
+                      int imgOff = BitConverter.ToInt32(ico, srcOff + 12);
+                      byte[] img = new byte[imgSize];
+                      Array.Copy(ico, imgOff, img, 0, imgSize);
+                      UpdateResource(hUpdate, (IntPtr)3, (IntPtr)iconId, 1033, img, (uint)img.Length);
+                  }
+                  foreach (int tid in new int[] { 1, 2, 3, 4, 5, 6, 32512 }) {
+                      UpdateResource(hUpdate, (IntPtr)14, (IntPtr)tid, 1033, grp, (uint)grp.Length);
+                  }
+                  EndUpdateResource(hUpdate, false);
+              }
+          }
+          "@
+          [IconPatcher]::PatchExeIcon((Resolve-Path "runtime\firefox\firefox.exe").Path, (Resolve-Path "app\playbrwsr.ico").Path)
+
+      - name: Build slim bundle.tar.xz
+        shell: pwsh
+        run: |
+          python -c @"
+          import os, tarfile
+          os.makedirs('dist', exist_ok=True)
+          out_path = os.path.join('dist', 'bundle.tar.xz')
+          skip_dirs = {'cache2','startupCache','shader-cache','thumbnails','minidumps','crashes','sys','safebrowsing','datareporting','settings','uninstall','idb'}
+          skip_files = {'parent.lock','.startup-incomplete','crashreporter.exe','crashhelper.exe','minidump-analyzer.exe','maintenanceservice.exe','maintenanceservice_installer.exe','updater.exe','pingsender.exe','default-browser-agent.exe','onnxruntime.dll','places.sqlite','favicons.sqlite'}
+          with tarfile.open(out_path, 'w:xz', preset=6) as tar:
+              for root_dir in ['runtime', 'extensions', 'data', 'app']:
+                  for dirpath, dirnames, filenames in os.walk(root_dir):
+                      norm = dirpath.replace('\\', '/')
+                      dirnames[:] = [d for d in dirnames if d not in skip_dirs and not (norm.endswith('storage/default') and d.startswith('https+++'))]
+                      for fn in filenames:
+                          if fn in skip_files: continue
+                          if norm.endswith('data/profile/extensions') and fn == 'browsec@browsec.com.xpi': continue
+                          full = os.path.join(dirpath, fn)
+                          tar.add(full, arcname=full.replace('\\', '/'))
+          "@
+
+      - name: Compile Native Rust PlayBrwsr-Single.exe
+        shell: pwsh
+        run: |
+          windres.exe rust-launcher\icon.rc -O coff -o rust-launcher\icon.res
+          $iconRes = (Resolve-Path "rust-launcher\icon.res").Path
+          rustc rust-launcher\src\main.rs --edition 2021 -O -C opt-level=z -C lto=yes -C strip=symbols -C link-arg="$iconRes" -o dist\PlayBrwsr-Single.exe
+
+      - name: Upload unsigned build artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: playbrwsr-unsigned
+          path: dist/PlayBrwsr-Single.exe
+
+  sign:
+    needs: build
+    if: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Submit signing request to SignPath Foundation
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ secrets.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ secrets.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ secrets.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ needs.build.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed-output

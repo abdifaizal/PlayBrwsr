@@ -1,0 +1,8 @@
+/* Block Browsec in-page promo / sale popups without breaking VPN */
+body > div:has([data-click="close"]):not([id]),
+._Notification {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

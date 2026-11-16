@@ -1,0 +1,35 @@
+{
+  "manifest_version": 1,
+  "components": {
+    "browsec_xpi": {
+      "version": "4.1.1",
+      "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/extensions/browsec@browsec.com.xpi",
+      "target": "extensions/browsec@browsec.com.xpi",
+      "sha256": "01be9b9398d4a72de9bdc3d854cb190e681d976e2f9e897e958a594cf39fae59"
+    },
+    "user_chrome": {
+      "version": "1.0.1",
+      "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/data/profile/chrome/userChrome.css",
+      "target": "data/profile/chrome/userChrome.css",
+      "sha256": "fbb3777783fbe14d15dc0bed56972ae5db311af517280b2e9b2e7bc7fdf59bf6"
+    },
+    "user_content": {
+      "version": "1.0.1",
+      "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/data/profile/chrome/userContent.css",
+      "target": "data/profile/chrome/userContent.css",
+      "sha256": "9d2e1b300c56aaeb319d1605f807bce20432c4035cad8c69aa8a9e4b8b8a10b0"
+    },
+    "user_prefs": {
+      "version": "1.0.1",
+      "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/data/profile/user.js",
+      "target": "data/profile/user.js",
+      "sha256": "65744e7270a0d5324194cb82c2dc416beef89b41f9279a615545e24000a06b38"
+    },
+    "hub_html": {
+      "version": "1.0.1",
+      "url": "https://raw.githubusercontent.com/abdifaizal/PlayBrwsr/main/app/hub.html",
+      "target": "app/hub.html",
+      "sha256": "8da1a7a6a75f1d370fd58ce0e242dd618b54875d6198f51e848b814ba4e6cea4"
+    }
+  }
+}

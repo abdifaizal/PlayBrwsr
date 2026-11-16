@@ -1,0 +1,90 @@
+/* PlayBrwsr — Desktop Media Player UI (Spotify / Netflix / Prime Video style) */
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+:root {
+  --toolbar-bgcolor: #09090b !important;
+  --lwt-accent-color: #09090b !important;
+  --tab-min-height: 36px !important;
+}
+
+/* Completely hide browser navigation bar, URL bar, bookmarks, and status bar */
+#nav-bar,
+#PersonalToolbar,
+#statuspanel,
+#firefox-view-button,
+#alltabs-button,
+#tabs-newtab-button,
+#new-tab-button,
+.tab-close-button,
+.titlebar-spacer,
+#private-browsing-indicator-with-label {
+  display: none !important;
+  visibility: collapse !important;
+}
+
+/* Sleek dark Media Player top bar */
+#navigator-toolbox {
+  background-color: #09090b !important;
+  border-bottom: 1px solid #1f1f27 !important;
+}
+
+#TabsToolbar {
+  background-color: #09090b !important;
+  padding: 6px 10px !important;
+  min-height: 46px !important;
+}
+
+/* Media Player mode-switcher pills (YouTube Video | YouTube Music) */
+.tabbrowser-tab {
+  max-width: 210px !important;
+  min-width: 140px !important;
+  margin-inline-end: 8px !important;
+}
+
+.tab-background {
+  background-color: #16161d !important;
+  border: 1px solid #262632 !important;
+  border-radius: 999px !important;
+  margin-block: 2px !important;
+  box-shadow: none !important;
+}
+
+.tabbrowser-tab:hover .tab-background {
+  background-color: #20202a !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-background {
+  background: linear-gradient(135deg, #e11d48 0%, #be123c 100%) !important;
+  border-color: #fb7185 !important;
+}
+
+.tab-label {
+  color: #a1a1aa !important;
+  font-family: "Segoe UI", system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-label {
+  color: #ffffff !important;
+}
+
+/* Clean window controls (minimize, maximize, close) */
+.titlebar-buttonbox-container {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.titlebar-button {
+  color: #d4d4d8 !important;
+  border-radius: 6px !important;
+}
+
+.titlebar-button:hover {
+  background-color: #27272a !important;
+}
+
+.titlebar-close:hover {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}

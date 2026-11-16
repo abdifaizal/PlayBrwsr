@@ -1,0 +1,19 @@
+# Binary runtime & build outputs (too large for git; distribute via GitHub Releases)
+runtime/
+dist/
+rust-launcher/target/
+rust-launcher/icon.res
+PlayBrwsr.exe
+
+# Profile runtime/state files (keep chrome/, user.js, and pre-activated Browsec state tracked)
+data/sys/
+data/profile/*
+!data/profile/chrome/
+!data/profile/user.js
+!data/profile/prefs.js
+!data/profile/extensions.json
+!data/profile/storage/
+data/profile/storage/*
+!data/profile/storage/default/
+data/profile/storage/default/*
+!data/profile/storage/default/moz-extension+++bba20292-a654-403f-a1f8-90d0db093b15^userContextId=4294967295/
